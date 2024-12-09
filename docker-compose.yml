@@ -1,0 +1,65 @@
+networks:
+  badtrip:
+    name: badtrip
+volumes:
+  # front:
+  #   driver: local
+  #   driver_opts:
+  #     type: none
+  #     device: /Users/nelallao/Desktop/docker_version/front/files
+  #     o: bind
+  # back:
+  #   driver: local
+  #   driver_opts:
+  #     type: none
+  #     device: /Users/nelallao/Desktop/docker_version/backend
+  #     o: bind
+  database:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/yichiba/database
+      o: bind
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgres
+    # ports:
+    #   - 5432:5432
+    volumes:
+      - database:/var/lib/postgresql/
+    env_file: .env
+    networks:
+      - badtrip
+
+  front:
+    container_name: front
+    build: ./front
+    depends_on:
+      - backend 
+    restart: always
+    # volumes:
+    #   - front:/files
+    networks:
+      - badtrip
+  backend:
+    container_name: backend
+    build: ./backend
+    depends_on:
+      - postgre
+    env_file: .env
+    restart: always
+    # volumes:
+    #   - back:/backend
+    networks:
+      - badtrip
+  server:
+    container_name: server 
+    build: ./server
+    ports:
+      - "443:443"
+    env_file: .env
+    restart: always
+    networks:
+      - badtrip
